@@ -26,7 +26,16 @@ def norm(vec: list[int], kind: str, weights: list[float] | None = None) -> float
         else:
             return sum(w * abs(x) for w, x in zip(weights, vec))
     else:
-        raise ValueError (f"unknown norm kind: {kind}")
+        raise ValueError(f"unknown norm kind: {kind}")
+
+
+def factorial(n: int) -> int:
+    if n < 0:
+        raise ValueError (f"{n} is negative")
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
 
 
 def main():
@@ -45,6 +54,12 @@ def main():
         for n in ["l1", "l2", "inf"]:
             print(f"{name} ({n}) = {norm(vec, n)}")
         print()
+
+    print("="*30, "TASK 4", "="*30)
+    for i in range(11):
+        print(f"{i}! = {factorial(i)}")
+
+
 
 if __name__ == "__main__":
     main()
