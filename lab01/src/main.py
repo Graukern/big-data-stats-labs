@@ -29,12 +29,31 @@ def norm(vec: list[int], kind: str, weights: list[float] | None = None) -> float
         raise ValueError(f"unknown norm kind: {kind}")
 
 
+
+def task_3(x: list[int], y: list[int], z: list[int]) -> dict[str, dict[str, float]]:
+    result = {}
+    vectors = {"x": x, "y": y, "z": z}
+    for name, vec in vectors.items():
+        result[name] = {}
+        for n in ["l1", "l2", "inf"]:
+            result[name][n] = norm(vec, n)
+    return result
+
+
+
 def factorial(n: int) -> int:
     if n < 0:
         raise ValueError(f"{n} is negative")
     result = 1
     for i in range(1, n + 1):
         result *= i
+    return result
+
+
+def task_4(n: int) -> list[int]:
+    result = []
+    for i in range(n + 1):
+        result.append(factorial(i))
     return result
 
 
@@ -61,16 +80,15 @@ def main():
     z = task_2(x, y)
     print(f"z = {z}")
 
-    print("="*30, "TASK 3", "="*30)
-    vectors = {"x": x, "y": y, "z": z}
-    for name, vec in vectors.items():
-        for n in ["l1", "l2", "inf"]:
-            print(f"{name} ({n}) = {norm(vec, n)}")
-        print()
+    print("="*30, "TASK 3", "="*30)    
+    for name, norms in task_3(x, y, z).items():
+        for kind, value in norms.items():
+            print(f"{name} ({kind}) = {value}")
 
     print("="*30, "TASK 4", "="*30)
-    for i in range(11):
-        print(f"{i}! = {factorial(i)}")
+    result = task_4(10)
+    for i, n in enumerate(result):
+        print(f"{i}! = {n}")
 
     print("="*30, "TASK 5", "="*30)
     vec_min, vec_max, vec_norm, vec_sum = task_5()
