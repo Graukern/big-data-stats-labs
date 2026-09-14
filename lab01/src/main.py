@@ -31,11 +31,24 @@ def norm(vec: list[int], kind: str, weights: list[float] | None = None) -> float
 
 def factorial(n: int) -> int:
     if n < 0:
-        raise ValueError (f"{n} is negative")
+        raise ValueError(f"{n} is negative")
     result = 1
     for i in range(1, n + 1):
         result *= i
     return result
+
+
+def task_5() -> tuple[int, int, float, int]:
+    print("Введите элементы через пробел.")
+    vector = list(map(int, input().split()))
+
+    print("Введите веса через пробел (в таком же количестве сколько и элементов выше).")
+    weights = list(map(float, input().split()))
+
+    if len(vector) != len(weights):
+        raise ValueError("The number of elements of the weights and the vector does not match")
+
+    return min(vector), max(vector), norm(vector, "w1", weights), sum(vector)
 
 
 def main():
@@ -59,6 +72,9 @@ def main():
     for i in range(11):
         print(f"{i}! = {factorial(i)}")
 
+    print("="*30, "TASK 5", "="*30)
+    vec_min, vec_max, vec_norm, vec_sum = task_5()
+    print(f"MIN: {vec_min}\nMAX: {vec_max}\nW_NORM: {vec_norm}\nSUM: {vec_sum}")
 
 
 if __name__ == "__main__":
