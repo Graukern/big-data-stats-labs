@@ -5,12 +5,15 @@ def task_1() -> tuple[list[int], list[int]]:
     return x, y
 
 
-def task_2(x: list[int], y: list[int]) -> list[int]:
+def task_2(x: list[int], y: list[int]) -> tuple[list[int], list[int]]:
     z = []
+    z_sorted = []
+
     for xi, yi in zip(x, y):
         z.extend([xi, yi]) 
-    z.sort()
-    return z
+    z_sorted = z.copy()
+    z_sorted.sort();
+    return z, z_sorted
 
 
 def norm(vec: list[int], kind: str, weights: list[float] | None = None) -> float:
@@ -77,16 +80,17 @@ def main():
     print(f"y = {y}")
 
     print("="*30, "TASK 2", "="*30)
-    z = task_2(x, y)
-    print(f"z = {z}")
+    z, z_sorted = task_2(x, y)
+    print(f"z = {z}\nAfter sort\nz = {z_sorted}")
 
     print("="*30, "TASK 3", "="*30)    
     for name, norms in task_3(x, y, z).items():
         for kind, value in norms.items():
             print(f"{name} ({kind}) = {value}")
-
+        print()
+        
     print("="*30, "TASK 4", "="*30)
-    result = task_4(10)
+    result = task_4(11)
     for i, n in enumerate(result):
         print(f"{i}! = {n}")
 
