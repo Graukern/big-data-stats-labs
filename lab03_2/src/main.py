@@ -100,8 +100,8 @@ def task_3(
 # Задание 4: амплитудный спектр Фурье
 def task_4(x: np.ndarray, h: float) -> dict:
     n = len(x)
-    amplitude = np.abs(np.fft.rfft(x))
-    freq = np.arange(len(amplitude)) / (n * h)
+    amplitude = np.abs(np.fft.rfft(x)) * 2 / n
+    freq = np.fft.rfftfreq(n, h)
 
     j_main = int(np.argmax(amplitude[1:])) + 1
     return dict(
@@ -128,9 +128,9 @@ def task_5(x: np.ndarray, named_trends: list[tuple[str, np.ndarray]]) -> list[di
             name=name, residual=r,
             p=p, e_p=e_p, s_p=s_p, z_p=(p - e_p) / s_p,
             tau=tau, s_tau=s_tau, z_tau=tau / s_tau,
-            random=abs(p - e_p) < 2 * s_p and abs(tau) < 2 * s_tau,
+            random=abs(p - e_p) < 1.96 * s_p and abs(tau) < 1.96 * s_tau,
             mean=float(r.mean()), std=float(r.std(ddof=1)), t_mean=float(t_mean),
-            unbiased=abs(t_mean) < 2,
+            unbiased=abs(t_mean) < 1.96,
             skew=skew, kurt=kurt, p_norm=p_norm,
             normal=p_norm > 0.05,
         ))
@@ -148,7 +148,7 @@ def print_task_3(rows: list[dict]) -> None:
 
 # Вывод результата задания 4
 def print_task_4(res: dict) -> None:
-    print(f"главная гармоника: номер j = {res['j_main']}, амплитуда A = {res['amplitude'][res['j_main']]:.1f}")
+    print(f"главная гармоника: номер j = {res['j_main']}, амплитуда A = {res['amplitude'][res['j_main']]:.3f} (точное значение 0.5)")
     print(f"частота f = {res['f_main']:.4f}, угловая частота w = {res['omega_main']:.4f}, "
           f"период T = {res['period']:.2f}")
     print("точные значения модельного ряда: w = 1, f = 1/(2*pi) = 0.1592, T = 2*pi = 6.28")
@@ -157,13 +157,13 @@ def print_task_4(res: dict) -> None:
 
 # Вывод таблицы задания 5
 def print_task_5(rows: list[dict]) -> None:
-    print("случайность: |p - E(p)| < 2 s(p) и |tau| < 2 s(tau)")
+    print("случайность: |p - E(p)| < 1.96 s(p) и |tau| < 1.96 s(tau)")
     print(f"{'остаток':<14} {'p':>4} {'E(p)':>7} {'z_p':>6} {'tau':>7} {'z_tau':>6} {'случаен':>8}")
     for r in rows:
         print(f"{r['name']:<14} {r['p']:>4} {r['e_p']:>7.1f} {r['z_p']:>+6.2f} "
               f"{r['tau']:>+7.3f} {r['z_tau']:>+6.2f} {'да' if r['random'] else 'НЕТ':>8}")
     print()
-    print("несмещенность: |t| < 2, нормальность: p-value критерия Харке-Бера > 0.05")
+    print("несмещенность: |t| < 1.96, нормальность: p-value критерия Харке-Бера > 0.05")
     print(f"{'остаток':<14} {'среднее':>8} {'СКО':>6} {'t':>6} {'несмещ.':>8} "
           f"| {'асимм.':>7} {'эксцесс':>8} {'p-value':>8} {'нормален':>9}")
     for r in rows:
