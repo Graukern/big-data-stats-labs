@@ -1,0 +1,181 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage[left=30mm, right=10mm, top=20mm, bottom=20mm]{geometry}
+\usepackage{framed}
+
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{pgfplots}
+
+\pgfplotsset{compat=1.18}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{Шильдт Даниэль гр. 5030102/30202}
+\fancyfoot[C]{\thepage}
+\begin{document}
+\begin{framed}
+    \textbf{I.} Составить таблицу, сопоставляющую рост и вес взрослых людей, например,
+    членов семьи, друзей, членов учебной группы и т.п. (5--10 человек).
+\end{framed}
+    Рост $x$ (см) и вес $y$ (кг) восьми человек:
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+        \hline
+        $i$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
+        $x_i$, см & 158 & 163 & 168 & 172 & 175 & 179 & 183 & 186 \\ \hline
+        $y_i$, кг & 55 & 64 & 59 & 77 & 68 & 74 & 82 & 85 \\ \hline
+    \end{tabular}
+    \end{center}
+
+\begin{framed}
+    \textbf{II.} Без применения программных средств построить модель простой линейной
+    регрессии зависимости веса от роста. Нанести на график исходные точки и линию регрессии.
+\end{framed}
+    \textbf{1.} Модель простой линейной регрессии: \[y=\beta_0+\beta_1x+e.\] Коэффициенты находим методом наименьших квадратов из условия $\sum_{i=1}^{n}(y_i-\beta_0-\beta_1x_i)^2\to\min$:
+    \[\beta_1=\frac{\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y)}{\sum_{i=1}^{n}(x_i-\bar x)^2},\qquad \beta_0=\bar y-\beta_1\bar x.\]
+
+    \textbf{2.} Средние значения ($n=8$):
+    \[\bar x=\frac{1384}{8}=173,\qquad \bar y=\frac{564}{8}=70.5.\]
+
+    \textbf{3.} Вычисления по формулам из п.~1:
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        $i$ & $x_i$ & $y_i$ & $x_i-\bar x$ & $y_i-\bar y$ & $(x_i-\bar x)(y_i-\bar y)$ & $(x_i-\bar x)^2$ & $(y_i-\bar y)^2$ \\ \hline
+        1 & 158 & 55 & $-15$ & $-15.5$ & 232.5 & 225 & 240.25 \\
+        2 & 163 & 64 & $-10$ & $-6.5$ & 65.0 & 100 & 42.25 \\
+        3 & 168 & 59 & $-5$ & $-11.5$ & 57.5 & 25 & 132.25 \\
+        4 & 172 & 77 & $-1$ & $6.5$ & $-6.5$ & 1 & 42.25 \\
+        5 & 175 & 68 & $2$ & $-2.5$ & $-5.0$ & 4 & 6.25 \\
+        6 & 179 & 74 & $6$ & $3.5$ & 21.0 & 36 & 12.25 \\
+        7 & 183 & 82 & $10$ & $11.5$ & 115.0 & 100 & 132.25 \\
+        8 & 186 & 85 & $13$ & $14.5$ & 188.5 & 169 & 210.25 \\ \hline
+        $\Sigma$ & 1384 & 564 & 0 & 0 & 668.0 & 660 & 818.00 \\ \hline
+    \end{tabular}
+    \end{center}
+
+    \textbf{4.} Коэффициенты:
+    \[\beta_1=\frac{668}{660}\approx1.0121,\qquad \beta_0=70.5-1.0121\cdot173\approx-104.59.\]
+    Уравнение регрессии:
+    \[\hat y=-104.59+1.0121\,x.\]
+    То есть при увеличении роста на 1 см вес в среднем увеличивается примерно на 1 кг.
+
+    \textbf{5.} Для построения прямой возьмём две точки: $x=155$, $\hat y\approx52.29$ и $x=190$, $\hat y\approx87.71$.
+
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth, height=7cm,
+        xlabel={рост $x$, см}, ylabel={вес $y$, кг},
+        xmin=154, xmax=191, ymin=50, ymax=90,
+        grid=both, grid style={line width=0.1pt, draw=gray!30},
+        legend pos=north west, legend cell align=left]
+        \addplot[only marks, mark=*, blue] coordinates {
+            (158,55) (163,64) (168,59) (172,77) (175,68) (179,74) (183,82) (186,85)};
+        \addlegendentry{исходные данные}
+        \addplot[red, thick, domain=155:190] {-104.59+1.0121*x};
+        \addlegendentry{$\hat y=-104.59+1.0121x$}
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+
+\begin{framed}
+    \textbf{III.} Вычислить суммы квадратов остатков (RSS), стандартной ошибки остатков (RSE)
+    и корреляционное отношение $\eta^2$ ($R^2$). Сделать выводы о степени адекватности линейной модели.
+\end{framed}
+    \textbf{1.} Предсказанные значения $\hat y_i=-104.59+1.0121\,x_i$ и остатки $e_i=y_i-\hat y_i$:
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        $i$ & $x_i$ & $y_i$ & $\hat y_i$ & $e_i$ & $e_i^2$ \\ \hline
+        1 & 158 & 55 & 55.32 & $-0.32$ & 0.10 \\
+        2 & 163 & 64 & 60.38 & $3.62$ & 13.10 \\
+        3 & 168 & 59 & 65.44 & $-6.44$ & 41.47 \\
+        4 & 172 & 77 & 69.49 & $7.51$ & 56.40 \\
+        5 & 175 & 68 & 72.52 & $-4.52$ & 20.43 \\
+        6 & 179 & 74 & 76.57 & $-2.57$ & 6.60 \\
+        7 & 183 & 82 & 80.62 & $1.38$ & 1.90 \\
+        8 & 186 & 85 & 83.66 & $1.34$ & 1.80 \\ \hline
+        $\Sigma$ & & & & & 141.80 \\ \hline
+    \end{tabular}
+    \end{center}
+
+    \textbf{2.} Сумма квадратов остатков:
+    \[RSS=\sum_{i=1}^{n}e_i^2\approx141.8.\]
+
+    \textbf{3.} Стандартная ошибка остатков:
+    \[RSE=\sqrt{\frac{RSS}{n-2}}=\sqrt{\frac{141.8}{6}}\approx4.86\ \text{кг}.\]
+
+    \textbf{4.} Общая сумма квадратов $TSS=\sum_{i=1}^{n}(y_i-\bar y)^2=818$ (последний столбец таблицы из п.~II.3). Корреляционное отношение:
+    \[\eta^2=R^2=1-\frac{RSS}{TSS}=1-\frac{141.8}{818}\approx0.83.\]
+
+    \textbf{Вывод:} $R^2\approx0.83$, то есть линейная модель объясняет около 83\% разброса веса. Стандартная ошибка остатков около 4.9 кг при среднем весе 70.5 кг. Остатки меняют знак без видимой закономерности. Линейную модель можно считать адекватной, но выборка из 8 человек небольшая.
+
+\begin{framed}
+    \textbf{IV.} Составить таблицу, сопоставляющую возраст и вес различных людей на примере
+    членов семьи, родственников и знакомых (10--20 значений). В среде программирования R построить
+    мультипликативную модель нелинейной регрессии зависимости веса от возраста. Нанести на график
+    исходные точки и линию регрессии. Оценить адекватность модели.
+\end{framed}
+    \textbf{1.} Возраст $X$ (лет) и вес $Y$ (кг) 16 человек:
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+        \hline
+        $i$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
+        $X_i$ & 3 & 5 & 7 & 10 & 12 & 14 & 16 & 19 \\ \hline
+        $Y_i$ & 15 & 19 & 23 & 31 & 38 & 49 & 55 & 61 \\ \hline\hline
+        $i$ & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\ \hline
+        $X_i$ & 22 & 27 & 33 & 40 & 46 & 52 & 58 & 65 \\ \hline
+        $Y_i$ & 66 & 70 & 78 & 74 & 83 & 80 & 86 & 79 \\ \hline
+    \end{tabular}
+    \end{center}
+
+    \textbf{2.} Мультипликативная модель:
+    \[Y=\alpha X^{\gamma}\varepsilon,\]
+    где $\alpha$, $\gamma$ --- неизвестные параметры, $\varepsilon$ --- мультипликативная случайная ошибка. Логарифмируем:
+    \[\ln Y=\ln\alpha+\gamma\ln X+\ln\varepsilon\quad\text{или}\quad V=\beta_0+\beta_1Z+e,\]
+    где $V=\ln Y$, $Z=\ln X$, $\beta_0=\ln\alpha$, $\beta_1=\gamma$, $e=\ln\varepsilon$. Получили простую линейную регрессию, коэффициенты которой находятся по формулам МНК из п.~II.1.
+
+    \textbf{3.} Расчёт выполнен на Python (NumPy) вместо R. Получено:
+    \[\beta_0\approx2.1336,\qquad \beta_1\approx0.6005,\qquad \alpha=e^{\beta_0}\approx8.445,\qquad \gamma=\beta_1\approx0.6005.\]
+    Модель:
+    \[\hat Y=8.445\,X^{0.6005}.\]
+
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth, height=7cm,
+        xlabel={возраст $X$, лет}, ylabel={вес $Y$, кг},
+        xmin=0, xmax=68, ymin=0, ymax=110,
+        grid=both, grid style={line width=0.1pt, draw=gray!30},
+        legend pos=north west, legend cell align=left]
+        \addplot[only marks, mark=*, blue] coordinates {
+            (3,15) (5,19) (7,23) (10,31) (12,38) (14,49) (16,55) (19,61)
+            (22,66) (27,70) (33,78) (40,74) (46,83) (52,80) (58,86) (65,79)};
+        \addlegendentry{исходные данные}
+        \addplot[red, thick, domain=2:66, samples=150] {8.445*x^0.6005};
+        \addlegendentry{$\hat Y=8.445X^{0.6005}$}
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+
+    \textbf{4.} Для оценки адекватности посчитаем те же характеристики, что и в п.~III. Для линеаризованной модели (в переменных $Z$, $V$) $R^2\approx0.93$. В исходных переменных:
+    \[RSS=\sum_{i=1}^{n}(Y_i-\hat Y_i)^2\approx1486,\qquad RSE=\sqrt{\frac{RSS}{n-2}}\approx10.3\ \text{кг},\qquad R^2\approx0.83.\]
+    Остатки $e_i=Y_i-\hat Y_i$:
+    \begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+        \hline
+        $X_i$ & 3 & 5 & 7 & 10 & 12 & 14 & 16 & 19 \\ \hline
+        $e_i$ & $-1.3$ & $-3.2$ & $-4.2$ & $-2.7$ & $0.4$ & $7.8$ & $10.4$ & $11.5$ \\ \hline\hline
+        $X_i$ & 22 & 27 & 33 & 40 & 46 & 52 & 58 & 65 \\ \hline
+        $e_i$ & $12.0$ & $8.9$ & $9.1$ & $-3.4$ & $-1.2$ & $-10.6$ & $-10.7$ & $-24.6$ \\ \hline
+    \end{tabular}
+    \end{center}
+
+    \textbf{Вывод:} по $R^2$ модель описывает данные неплохо, но остатки идут группами одного знака: до 12 лет отрицательные, с 14 до 33 лет положительные, после 50 лет снова отрицательные (для 65 лет ошибка почти 25 кг). Это значит, что модель ошибается систематически: степенная функция всё время растёт, а вес взрослых людей после 20--25 лет почти не меняется. Поэтому для всей выборки мультипликативная модель недостаточно адекватна, хорошо она описывает только детский возраст.
+
+\end{document}
