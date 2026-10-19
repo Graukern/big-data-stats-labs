@@ -153,23 +153,26 @@ def task_2(dates: np.ndarray, temp: np.ndarray, widths: tuple[int, ...] = (31, 9
     n = len(temp)
     k = np.arange(n)
 
-    slope, intercept = np.polyfit(k, temp, 1)
-    linear = slope * k + intercept
-    slope_se = np.std(temp - linear, ddof=2) / np.sqrt(np.sum((k - k.mean()) ** 2))
-    smooth = {w: moving_mean(temp, w) for w in widths}
-
-    detrended = temp - linear
-    spectrum = np.fft.rfft(detrended)
+    spectrum = np.fft.rfft(temp - temp.mean())
     amplitude = np.abs(spectrum) * 2 / n
     freq = np.fft.rfftfreq(n, 1)
     j = int(np.argmax(amplitude[1:])) + 1
     period = 1 / freq[j]
-    phase = float(np.angle(spectrum[j]))
-    seasonal = amplitude[j] * np.cos(2 * np.pi * j * k / n + phase)
+
+    design = np.column_stack([np.ones(n), k, np.cos(2 * np.pi * k / period), np.sin(2 * np.pi * k / period)])
+    coef = np.linalg.lstsq(design, temp, rcond=None)[0]
+    linear = design[:, :2] @ coef[:2]
+    seasonal = design[:, 2:] @ coef[2:]
+    residual = temp - linear - seasonal
+    slope_se = np.sqrt(residual @ residual / (n - 4) * np.linalg.inv(design.T @ design)[1, 1])
+
+    seasonal_amp = float(np.hypot(coef[2], coef[3]))
+    phase = float(np.arctan2(-coef[3], coef[2]))
     day_max = int(round((-phase * period / (2 * np.pi)) % period))
 
-    residual = detrended - seasonal
-    series = {"исходный ряд": temp, "без тренда": detrended, "остатки": residual}
+    smooth = {w: moving_mean(temp, w) for w in widths}
+    deseasoned = temp - seasonal
+    series = {"исходный ряд": temp, "без сезонности": deseasoned, "остатки": residual}
 
     stats = []
     for name, s in series.items():
@@ -183,13 +186,15 @@ def task_2(dates: np.ndarray, temp: np.ndarray, widths: tuple[int, ...] = (31, 9
             hurst=h, hurst_c=c, sizes=sizes, rs=rs,
         ))
 
+    tau, s_tau = kendall_tau(deseasoned)
     return dict(
-        dates=dates, temp=temp, linear=linear, slope_year=float(slope * 365.25),
+        dates=dates, temp=temp, linear=linear, slope_year=float(coef[1] * 365.25),
         slope_year_se=float(slope_se * 365.25), smooth=smooth,
+        trend_tau=tau, trend_s_tau=s_tau,
         freq=freq, amplitude=amplitude, j_main=j, period=float(period),
-        seasonal_amp=float(amplitude[j]), seasonal=seasonal,
+        seasonal_amp=seasonal_amp, seasonal=seasonal,
         date_max=dates[0] + np.timedelta64(day_max, "D"),
-        detrended=detrended, residual=residual, stats=stats,
+        detrended=temp - linear, residual=residual, stats=stats,
     )
 
 
@@ -210,14 +215,19 @@ def print_task_2(res: dict, city: str) -> None:
     n = len(res["temp"])
     print(f"{city}: {res['dates'][0]} - {res['dates'][-1]}, {n} дней")
     print()
+    print(f"главный период спектра Фурье: j = {res['j_main']}, T = {res['period']:.1f} дней")
+    print()
+    print("МНК-модель: x_k = a0 + a1*k + c*cos(2*pi*k/T) + d*sin(2*pi*k/T)")
     print(f"линейный тренд: {res['slope_year']:+.2f} +- {res['slope_year_se']:.2f} градусов в год (1 s.e.)")
+    trend = "значим" if abs(res["trend_tau"]) > 1.96 * res["trend_s_tau"] else "не значим"
+    print(f"коэффициент Кендэла для ряда без сезонности: tau = {res['trend_tau']:+.3f}, "
+          f"s(tau) = {res['trend_s_tau']:.4f}, тренд {trend}")
     for w, y in res["smooth"].items():
         valid = y[~np.isnan(y)]
         print(f"скользящее среднее w={w:>3}: от {valid[0]:+6.2f} до {valid[-1]:+6.2f} градусов "
               f"(размах {valid.max() - valid.min():.2f})")
     print()
-    print(f"главный период спектра Фурье: j = {res['j_main']}, T = {res['period']:.1f} дней, "
-          f"амплитуда = {res['seasonal_amp']:.2f} градусов")
+    print(f"сезонная волна: период T = {res['period']:.1f} дней, амплитуда = {res['seasonal_amp']:.2f} градусов")
     print(f"максимум сезонной волны приходится на {res['date_max']}")
     print()
     print("случайность: |p - E(p)| < 1.96 s(p) и |tau| < 1.96 s(tau)")
@@ -265,7 +275,7 @@ def draw_temperature(res: dict, city: str) -> None:
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5), dpi=110)
     ax1.plot(res["freq"][1:], res["amplitude"][1:], color="tab:blue")
-    ax1.set_title("Амплитудный спектр Фурье (без тренда)", fontsize=12)
+    ax1.set_title("Амплитудный спектр Фурье", fontsize=12)
     ax1.set_xlabel("частота, 1/день")
     ax1.set_ylabel("амплитуда, °C")
 
